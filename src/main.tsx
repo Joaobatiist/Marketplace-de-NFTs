@@ -4,6 +4,8 @@ import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/query-client'
 import { routeTree } from './routeTree.gen'
+import { setSessionExpiredHandler, tokenStorage } from '@/lib/http'
+import { sessionQueryOptions } from '@/features/auth/queries'
 import './index.css'
 
 const router = createRouter({
@@ -19,6 +21,14 @@ declare module '@tanstack/react-router' {
     router: typeof router
   }
 }
+
+setSessionExpiredHandler(() => {
+  tokenStorage.clear()
+  queryClient.clear()
+  queryClient.setQueryData(sessionQueryOptions.queryKey, null)
+  // reexecuta o beforeLoad das rotas: se a atual for protegida, manda para o login
+  void router.invalidate()
+})
 
 async function enableMocking() {
   if (import.meta.env.VITE_ENABLE_MOCKS !== 'true') return

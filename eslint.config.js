@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // mockServiceWorker.js é gerado pelo MSW (npx msw init)
+  globalIgnores(['dist', 'public/mockServiceWorker.js']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -17,6 +18,13 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+    rules: {
+      // `_` marca descarte intencional, ex.: const { passwordHash: _, ...user } = storedUser
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_' },
+      ],
     },
     ignores: [
       'dist', 

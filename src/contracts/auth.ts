@@ -33,3 +33,8 @@ export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
 }
+
+export interface AuthResponse {
+  session: Session
+  token: string
+}
