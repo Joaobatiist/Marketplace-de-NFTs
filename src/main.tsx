@@ -20,10 +20,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
-)
+async function enableMocking() {
+  if (import.meta.env.VITE_ENABLE_MOCKS !== 'true') return
+  const { worker } = await import('./mocks/browser')
+  await worker.start({
+    onUnhandledFrame({ frame, defaults }) {
+      // frames podem ser HTTP ou WebSocket; só nos interessam requisições HTTP
+      if (frame.protocol !== 'http') return
+      const { request } = frame.data as { request: Request }
+      // avisa só sobre chamadas de API esquecidas; ignora imagens, fontes etc.
+      if (new URL(request.url).pathname.startsWith('/api')) defaults.warn()
+    },
+  })
+}
+
+enableMocking().then(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StrictMode>,
+  )
+})
