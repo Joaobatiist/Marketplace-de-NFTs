@@ -3,7 +3,8 @@ import { seedNfts } from './fixtures/nfts'
 import { seedUsers, seedWallets } from './fixtures/users'
 import { seedCoupons } from './coupons'
 
-const STORAGE_KEY = 'nft-marketplace:mock-db:v1'
+// v2: categorias mudaram; a chave nova descarta bancos salvos com as categorias antigas
+const STORAGE_KEY = 'nft-marketplace:mock-db:v2'
 
 export interface StoredUser extends User {
   passwordHash: string

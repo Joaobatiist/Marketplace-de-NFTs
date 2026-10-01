@@ -14,7 +14,7 @@ export interface Nft {
   name: string
   description: string
   collection: string
-  category: string
+  category: NftCategory
   creator: { name: string; avatarUrl: string }
   images: string[]
   editions: NftEdition[]
@@ -22,12 +22,26 @@ export interface Nft {
   createdAt: ISODate
   version: number
 }
+// ordem do Figma (filtro "Coleções"); rótulos em PT ficam no FilterPanel
+export const NFT_CATEGORIES = [
+  'digital_art',
+  'photography',
+  'music',
+  'art_3d',
+  'collectibles',
+  'generative',
+  'gaming',
+  'memberships',
+  'utility',
+] as const
+export type NftCategory = (typeof NFT_CATEGORIES)[number]
 
-export type NftSort = 'recent' | 'price_asc' | 'price_desc' | 'name'
+export const NFT_SORTS = ['recent', 'price_asc', 'price_desc', 'name'] as const
+export type NftSort = (typeof NFT_SORTS)[number]
 
 export interface NftListParams {
   q?: string
-  category?: string
+  category?: NftCategory
   minPrice?: EthAmount
   maxPrice?: EthAmount
   onlyAvailable?: boolean
