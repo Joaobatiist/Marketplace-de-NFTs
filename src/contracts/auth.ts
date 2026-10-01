@@ -38,3 +38,7 @@ export interface AuthResponse {
   session: Session
   token: string
 }
+
+export interface FavoritesResponse {
+  nftIds: string[]
+}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { Nft } from '@/contracts'
 import { formatEth, isSoldOut, minEditionPrice } from '@/lib/eth'
@@ -7,13 +8,17 @@ import { NftImage } from './nft-image'
 
 interface NftCardProps {
   nft: Nft
+  /** controle sobre a imagem (ex.: favoritar), no canto superior direito como no Figma */
+  action?: ReactNode
 }
 
 /*
- * Estrutura: o link fica no nome (h3) e se estica por cima do card inteiro (after:inset-0).
- * Assim o card todo é clicável, mas o leitor de tela anuncia só o nome, sem repetir o alt da imagem.
+ * Estrutura: o link fica só no nome (h3) e se estica por cima do card inteiro (after:inset-0).
+ * Assim o card todo é clicável, o leitor de tela anuncia só o nome, e o `action` pode ser um
+ * <button> sem ficar dentro do <a> (HTML inválido): ele fica num bloco posicionado com z-10,
+ * acima da camada do link.
  */
-export function NftCard({ nft }: NftCardProps) {
+export function NftCard({ nft, action }: NftCardProps) {
   const soldOut = isSoldOut(nft)
 
   return (
@@ -40,6 +45,8 @@ export function NftCard({ nft }: NftCardProps) {
           )}
         </div>
       </div>
+
+      {action && <div className="absolute top-4 right-4 z-10 sm:top-5 sm:right-5">{action}</div>}
 
       <div className="mt-3 space-y-1 px-1">
         <h3 className="truncate text-sm sm:text-base">

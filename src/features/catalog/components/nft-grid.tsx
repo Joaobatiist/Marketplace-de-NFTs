@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Nft } from '@/contracts'
 import { NftCard, NftCardSkeleton } from './nft-card'
 
@@ -11,14 +12,16 @@ const itemClass = 'min-w-0 max-md:even:translate-y-10'
 
 interface NftGridProps {
   nfts: Nft[]
+  /** controle extra por card (ex.: botão de favoritar), repassado como `action` do NftCard */
+  renderCardAction?: (nft: Nft) => ReactNode
 }
 
-export function NftGrid({ nfts }: NftGridProps) {
+export function NftGrid({ nfts, renderCardAction }: NftGridProps) {
   return (
     <ul className={gridClass}>
       {nfts.map((nft) => (
         <li key={nft.id} className={itemClass}>
-          <NftCard nft={nft} />
+          <NftCard nft={nft} action={renderCardAction?.(nft)} />
         </li>
       ))}
     </ul>

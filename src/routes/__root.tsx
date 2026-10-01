@@ -6,6 +6,7 @@ import { useLogout, useSession } from "@/features/auth/queries";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+import { Toaster } from 'sonner'
 
 interface RootRouteContext {
     queryClient: QueryClient;
@@ -39,6 +40,7 @@ function RootLayout() {
       <MobileBottomNav cartCount={0} isAuthenticated={!!user} />
       {import.meta.env.DEV && (
         <>
+        <Toaster theme="dark" position="bottom-center" richColors />
           <TanStackRouterDevtools position="bottom-right" />
           <ReactQueryDevtools buttonPosition="bottom-left" />
         </>
