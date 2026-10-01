@@ -33,6 +33,9 @@ export interface StoredOrder extends Order {
   idempotencyKey: string
   /** conteúdo da requisição serializado: detecta chave reutilizada com dados diferentes */
   requestFingerprint: string
+  /** quando o pagamento simulado será resolvido */
+  settleAt: string
+  outcome: 'confirmed' | 'declined'
 }
 
 export interface DbState {

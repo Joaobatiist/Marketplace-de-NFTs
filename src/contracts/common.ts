@@ -15,6 +15,7 @@ export type ApiErrorCode =
   | 'QUOTE_OUTDATED'
   | 'IDEMPOTENCY_CONFLICT'
   | 'SERVICE_UNAVAILABLE'
+  | 'WALLET_REJECTED'
 
 export interface ApiError {
   code: ApiErrorCode
