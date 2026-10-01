@@ -3,8 +3,8 @@ import { seedNfts } from './fixtures/nfts'
 import { seedUsers, seedWallets } from './fixtures/users'
 import { seedCoupons } from './coupons'
 
-// v2: categorias mudaram; a chave nova descarta bancos salvos com as categorias antigas
-const STORAGE_KEY = 'nft-marketplace:mock-db:v2'
+// v3: formato do carrinho mudou (priceSeen, cartCoupons); a chave nova descarta bancos antigos
+const STORAGE_KEY = 'nft-marketplace:mock-db:v3'
 
 export interface StoredUser extends User {
   passwordHash: string
@@ -18,6 +18,7 @@ export interface StoredCartItem {
   nftId: string
   editionId: string
   quantity: number
+  priceSeen: string
 }
 export interface Coupon {
   code: string
@@ -41,6 +42,7 @@ export interface DbState {
   coupons: Coupon[]
   favorites: Record<string, string[]> // userId -> nftIds
   carts: Record<string, StoredCartItem[]> // "user:ID" ou "guest:ID" -> itens
+  cartCoupons: Record<string, string> // chave do carrinho -> código
   wallets: Record<string, Wallet[]> // userId -> carteiras
   quotes: Record<string, StoredQuote>
   orders: Record<string, StoredOrder>
@@ -55,6 +57,7 @@ function createSeed(): DbState {
     coupons: structuredClone(seedCoupons),
     favorites: {},
     carts: {},
+    cartCoupons: {},
     wallets: structuredClone(seedWallets),
     quotes: {},
     orders: {},

@@ -70,5 +70,20 @@ export function mergeGuestCart(guestId: string | null, userId: string) {
   }
 
   db.carts[userKey] = merged.filter((i) => i.quantity > 0)
+  if (db.cartCoupons[guestKey] && !db.cartCoupons[userKey]) {
+    db.cartCoupons[userKey] = db.cartCoupons[guestKey]
+  }
+  delete db.cartCoupons[guestKey]
   delete db.carts[guestKey]
+}
+
+/** carrinho de quem? token válido = usuário; sem token = visitante; token inválido = erro de sessão */
+export function resolveCartOwner(request: Request) {
+  if (request.headers.get('Authorization')) {
+    const auth = requireAuth(request)
+    // `'error' in auth` não estreita aqui (o outro membro vira `error?: undefined`); estreitar pelo valor
+    if (auth.error) return { error: auth.error } as const
+    return { key: cartKey(auth.user.id, null) } as const
+  }
+  return { key: cartKey(null, request.headers.get('X-Guest-Id')) } as const
 }

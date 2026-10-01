@@ -2,7 +2,6 @@ import type { EthAmount, ISODate } from './common'
 import type { Network } from './wallet'
 
 export interface QuoteRequest {
-  couponCode?: string
   network: Network
 }
 

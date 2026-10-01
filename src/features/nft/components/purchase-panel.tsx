@@ -127,10 +127,13 @@ interface QuantityInputProps {
   value: number
   max: number
   onChange: (q: number) => void
+  /** em listas (carrinho), completa os rótulos acessíveis: "Qtd. de {itemName}" */
+  itemName?: string
 }
 
 /** − / campo / +, sempre entre 1 e max; avisa por escrito quando chega ao limite */
-export function QuantityInput({ value, max, onChange }: QuantityInputProps) {
+export function QuantityInput({ value, max, onChange, itemName }: QuantityInputProps) {
+  const of = itemName ? ` de ${itemName}` : ''
   const id = useId()
   const [draft, setDraft] = useState(String(value))
   const [prevValue, setPrevValue] = useState(value)
@@ -170,12 +173,13 @@ export function QuantityInput({ value, max, onChange }: QuantityInputProps) {
       <div className="flex items-center gap-3">
         <label htmlFor={id} className="text-sm text-muted-foreground">
           Qtd.
+          {itemName && <span className="sr-only">{of}</span>}
         </label>
         <button
           type="button"
           onClick={() => change(value - 1)}
           disabled={disabled || value <= 1}
-          aria-label="Diminuir quantidade"
+          aria-label={`Diminuir quantidade${of}`}
           aria-controls={id}
           className={stepClass}
         >
@@ -204,7 +208,7 @@ export function QuantityInput({ value, max, onChange }: QuantityInputProps) {
           type="button"
           onClick={() => change(value + 1)}
           disabled={disabled || value >= max}
-          aria-label="Aumentar quantidade"
+          aria-label={`Aumentar quantidade${of}`}
           aria-controls={id}
           className={stepClass}
         >

@@ -10,6 +10,8 @@ import { NftInfo } from '@/features/nft/components/nft-info'
 import { PurchasePanel } from '@/features/nft/components/purchase-panel'
 import { NftDetailSkeleton } from '@/features/nft/components/nft-detail-skeleton'
 import { FavoriteToggle } from '@/features/favorites/components/favorite-toggle'
+import { toast } from 'sonner'
+import { useAddToCart } from '@/features/cart/queries'
 import type { Nft } from '@/contracts'
 
 export const Route = createFileRoute('/nfts/$nftId')({
@@ -56,6 +58,21 @@ function NftDetail({ nft }: { nft: Nft }) {
   const maxQuantity = Math.min(edition.available, edition.maxPerOrder)
   const safeQuantity = Math.min(Math.max(quantity, 1), Math.max(maxQuantity, 1))
 
+  const navigate = useNavigate()
+  const addToCart = useAddToCart()
+
+  const handleAddToCart = () =>
+    addToCart.mutate(
+      { nftId: nft.id, editionId: edition.id, quantity: safeQuantity },
+      {
+        onSuccess: () =>
+          toast.success('Adicionado ao carrinho', {
+            action: { label: 'Ver carrinho', onClick: () => void navigate({ to: '/cart' }) },
+          }),
+        onError: (error) => toast.error(toApiError(error).message),
+      },
+    )
+
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 lg:grid-cols-2">
       <NftGallery images={nft.images} name={nft.name} />
@@ -74,7 +91,8 @@ function NftDetail({ nft }: { nft: Nft }) {
           quantity={safeQuantity}
           maxQuantity={maxQuantity}
           onQuantityChange={setQuantity}
-          // onAddToCart é ligado no passo 10
+          onAddToCart={handleAddToCart}
+          isAdding={addToCart.isPending}
         />
       </div>
     </div>

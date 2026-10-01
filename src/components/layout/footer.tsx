@@ -47,8 +47,9 @@ export function Footer() {
             <h2 className="font-bold">Antecipe-se ao próximo lançamento</h2>
             {/* newsletter ainda sem backend: campos desabilitados com aviso, para não parecer que funciona */}
             <form className="mt-3" aria-describedby={`${emailId}-soon`} onSubmit={(e) => e.preventDefault()}>
+              {/* rótulo sem "e-mail": não colide com o campo E-mail dos formulários de login/cadastro */}
               <label htmlFor={emailId} className="sr-only">
-                Seu e-mail
+                Endereço para receber a newsletter
               </label>
               <div className="flex">
                 <input
