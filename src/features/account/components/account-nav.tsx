@@ -1,64 +1,66 @@
-import { Link } from '@tanstack/react-router'
-import { Download, Heart, LifeBuoy, LogOut, ShoppingCart, Tag, User, Wallet, type LucideIcon } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { Link, useLocation } from '@tanstack/react-router'
+import { Download, Heart, LogOut, MapPin, ShoppingCart, SquareActivity, TriangleAlert, User, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { ComingSoon } from '@/components/layout/coming-soon'
 
 interface AccountNavProps {
-  current: 'profile' | 'wallets'
   onLogout: () => void
 }
 
-const LINKS: { id: AccountNavProps['current']; to: '/profile' | '/wallets'; label: string; icon: LucideIcon }[] = [
-  { id: 'profile', to: '/profile', label: 'Dados do perfil', icon: User },
-  { id: 'wallets', to: '/wallets', label: 'Carteiras', icon: Wallet },
+type AccountPath = '/profile' | '/wallets' | '/activity' | '/watchlist' | '/offers' | '/downloads' | '/support'
+
+/** itens da barra "Meu perfil", na ordem e com os ícones do Figma */
+const LINKS: { to: AccountPath; label: string; icon: LucideIcon }[] = [
+  { to: '/profile', label: 'Dados do perfil', icon: User },
+  { to: '/wallets', label: 'Carteiras', icon: MapPin },
+  { to: '/activity', label: 'Atividade', icon: ShoppingCart },
+  { to: '/watchlist', label: 'Lista de interesse', icon: Heart },
+  { to: '/offers', label: 'Ofertas', icon: SquareActivity },
+  { to: '/downloads', label: 'Arquivos baixados', icon: Download },
+  { to: '/support', label: 'Suporte', icon: TriangleAlert },
 ]
 
-/** itens do Figma sem tela ainda: texto "Em breve" (não são links) */
-const SOON: { label: string; icon: LucideIcon }[] = [
-  { label: 'Atividade', icon: ShoppingCart },
-  { label: 'Lista de interesse', icon: Heart },
-  { label: 'Ofertas', icon: Tag },
-  { label: 'Arquivos baixados', icon: Download },
-  { label: 'Suporte', icon: LifeBuoy },
-]
+const itemClass = cn(
+  'relative flex h-[2.8125rem] w-full cursor-pointer items-center gap-3.5 px-4 text-[0.9375rem] whitespace-nowrap text-primary outline-none',
+  'hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset lg:px-6',
+)
 
-/** barra lateral "Meu perfil" (Figma: Perfil do colecionador e Carteiras) */
-export function AccountNav({ current, onLogout }: AccountNavProps) {
+/**
+ * Barra lateral "Meu perfil" (Figma). Item atual: barra laranja à esquerda no desktop e embaixo no
+ * mobile (forma, não só cor) + aria-current="page", que o Link do router marca sozinho.
+ * No mobile vira uma faixa com rolagem horizontal acima do conteúdo.
+ */
+export function AccountNav({ onLogout }: AccountNavProps) {
+  const navRef = useRef<HTMLElement>(null)
+  const pathname = useLocation({ select: (l) => l.pathname })
+
+  // mobile: a faixa rola até o item atual (no desktop a lista é vertical e nada muda)
+  useEffect(() => {
+    navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [pathname])
+
   return (
-    <nav aria-label="Minha conta" className="rounded-xl bg-card py-3 lg:self-start">
-      <h2 className="px-4 pb-2 text-lg font-bold">Meu perfil</h2>
-      <ul className="flex gap-1 overflow-x-auto px-2 lg:flex-col lg:px-0">
-        {LINKS.map(({ id, to, label, icon: Icon }) => (
-          <li key={id} className="shrink-0">
+    <nav ref={navRef} aria-label="Minha conta" className="bg-card pt-5 lg:self-start lg:pt-6 lg:pb-5">
+      <h2 className="px-4 text-lg font-bold lg:px-2.5">Meu perfil</h2>
+      <ul className="mt-1 flex overflow-x-auto lg:flex-col lg:overflow-visible">
+        {LINKS.map(({ to, label, icon: Icon }) => (
+          <li key={to} className="shrink-0">
             <Link
               to={to}
-              aria-current={current === id ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring lg:rounded-none lg:px-4',
-                // atual: cor + barra lateral + negrito (não depende só da cor)
-                current === id ? 'bg-accent font-bold text-primary lg:shadow-[inset_4px_0_0_var(--color-primary)]' : 'text-primary/90 hover:bg-accent',
+                itemClass,
+                'before:absolute before:hidden before:bg-primary data-[status=active]:before:block',
+                'before:inset-x-3 before:bottom-0 before:h-1 lg:before:inset-x-auto lg:before:inset-y-0 lg:before:left-0 lg:before:h-auto lg:before:w-1.5',
               )}
             >
-              <Icon aria-hidden="true" className="size-4" />
+              <Icon aria-hidden="true" className="size-[1.125rem] shrink-0" strokeWidth={1.75} />
               {label}
             </Link>
           </li>
         ))}
-        {SOON.map(({ label, icon: Icon }) => (
-          <li key={label} className="hidden px-4 py-2.5 text-sm lg:block">
-            <ComingSoon>
-              <Icon aria-hidden="true" className="size-4" />
-              {label}
-            </ComingSoon>
-          </li>
-        ))}
-        <li className="shrink-0 lg:mt-1 lg:border-t lg:pt-1">
-          <button
-            type="button"
-            onClick={onLogout}
-            className="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm font-bold text-primary outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring lg:rounded-none lg:px-4"
-          >
-            <LogOut aria-hidden="true" className="size-4" />
+        <li className="shrink-0 lg:mt-1 lg:border-t lg:border-border">
+          <button type="button" onClick={onLogout} className={cn(itemClass, 'font-bold')}>
+            <LogOut aria-hidden="true" className="size-[1.125rem] shrink-0" strokeWidth={1.75} />
             Sair
           </button>
         </li>

@@ -1,6 +1,6 @@
 # Kurio — Marketplace de NFTs
 
-Marketplace de NFTs com catálogo filtrável, detalhe com edições, favoritos, carrinho no servidor com cupom, checkout com carteira e pagamento simulado idempotente, recibo, conta (perfil, avatar, senha, carteiras) e preços atualizados em tempo real por Socket.IO. O backend é simulado no navegador com **MSW** (REST + WebSocket), com cenários de rede e falha configuráveis, persistência em `localStorage` e reset. Fluxos, falhas e regressão visual são cobertos por testes E2E com Playwright.
+Marketplace de NFTs com catálogo filtrável, detalhe com edições, favoritos, carrinho no servidor com cupom, checkout com carteira e pagamento simulado idempotente, recibo, seções Mercado, Criadores e Aprenda, área "Meu perfil" (perfil com ENS e avatar, senha, carteiras, atividade, lista de interesse, ofertas, arquivos baixados e suporte) e preços atualizados em tempo real por Socket.IO. O backend é simulado no navegador com **MSW** (REST + WebSocket), com cenários de rede e falha configuráveis, persistência em `localStorage` e reset. Fluxos, falhas e regressão visual são cobertos por testes E2E com Playwright.
 
 - **Deploy:** _(preencher com a URL da Vercel após o deploy)_
 - **Repositório:** https://github.com/Joaobatiist/Marketplace-de-NFTs
@@ -94,7 +94,7 @@ O helper `window.__mock` fica disponível no console quando os mocks estão liga
 
 ## Testes
 
-`npm run test:e2e` faz o build, sobe o `vite preview` e roda 11 arquivos em `e2e/` nos projetos desktop e mobile: catálogo (busca, filtros, ordenação, paginação, voltar/avançar, refresh), detalhe, autenticação (cadastro, validação, rota protegida, expiração de sessão na navegação e no checkout, troca de usuário sem vazar dados), favoritos (otimista e rollback), carrinho e cupons, checkout (compra completa, clique repetido, recusa, timeout, refresh no pendente, carteira recusada, recibo de outro usuário), tempo real (preço ao vivo, duplicata, evento antigo, reconexão), conta (perfil, avatar, senha, carteiras), acessibilidade (teclado, skip link, foco preso em Sheets, erros associados), carregamento/falha e regressão visual.
+`npm run test:e2e` faz o build, sobe o `vite preview` e roda 12 arquivos em `e2e/` nos projetos desktop e mobile: catálogo (busca, filtros, ordenação, paginação, voltar/avançar, refresh), detalhe, autenticação (cadastro, validação, rota protegida, expiração de sessão na navegação e no checkout, troca de usuário sem vazar dados), favoritos (otimista e rollback), carrinho e cupons, checkout (compra completa, clique repetido, recusa, timeout, refresh no pendente, carteira recusada, recibo de outro usuário), tempo real (preço ao vivo, duplicata, evento antigo, reconexão), conta (perfil, avatar, senha, carteiras), seções Mercado/Criadores/Aprenda com o menu marcado, acessibilidade (teclado, skip link, foco preso em Sheets, erros associados), carregamento/falha e regressão visual.
 
 Cada teste parte de um estado isolado (`?reset=1&scenario=fast`). Os eventos de tempo real são disparados pelo servidor simulado (`window.__mock`) e chegam pelo `socket.io-client`; nenhum teste altera o cache ou a UI diretamente.
 

@@ -1,14 +1,15 @@
 import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { z } from 'zod'
 import { loginSchema, type LoginRequest } from '@/contracts'
 import { sessionQueryOptions, useLogin } from '@/features/auth/queries'
 import { safeRedirect } from '@/features/auth/utils'
+import { AuthShell } from '@/features/auth/components/auth-shell'
+import { AuthInput } from '@/features/auth/components/auth-input'
+import { authLinkClass, authSubmitClass } from '@/features/auth/styles'
 import { toApiError } from '@/lib/http'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 export const Route = createFileRoute('/login')({
   validateSearch: z.object({ redirect: z.string().optional() }),
@@ -44,53 +45,63 @@ function LoginPage() {
   })
 
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-12">
-      <h1 className="mb-6 text-2xl font-bold">Entrar</h1>
-
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
+    <AuthShell
+      mode="login"
+      title="Entrar"
+      description="Entre para gerenciar sua carteira, coleção e perfil de criador."
+      redirect={redirectTo}
+      switchPrompt={
+        <>
+          Novo na Kurio?{' '}
+          <Link to="/register" search={{ redirect: redirectTo }} className={authLinkClass}>
+            Crie uma conta
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} noValidate className="space-y-3">
         {errors.root && (
-          <p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">
+          <p role="alert" className="rounded-[3px] border border-destructive p-3 text-sm text-destructive">
             {errors.root.message}
           </p>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="email">E-mail</Label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            {...form.register('email')}
-          />
-          {errors.email && <p id="email-error" className="text-sm text-destructive">{errors.email.message}</p>}
+        <AuthInput
+          label="E-mail"
+          type="email"
+          autoComplete="email"
+          placeholder="contato@email.com"
+          error={errors.email?.message}
+          {...form.register('email')}
+        />
+        <AuthInput
+          label="Senha"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Senha"
+          revealable
+          error={errors.password?.message}
+          {...form.register('password')}
+        />
+
+        <div className="flex justify-end pt-1">
+          {/* estático: recuperação de senha não faz parte do escopo */}
+          <button
+            type="button"
+            aria-disabled="true"
+            onClick={() => toast.info('Recuperação de senha ainda não está disponível.')}
+            className={`${authLinkClass} text-sm`}
+          >
+            Esqueceu a senha?
+          </button>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'password-error' : undefined}
-            {...form.register('password')}
-          />
-          {errors.password && <p id="password-error" className="text-sm text-destructive">{errors.password.message}</p>}
+        <div className="pt-6 lg:pt-3">
+          <button type="submit" disabled={isSubmitting} className={authSubmitClass}>
+            {isSubmitting ? 'Entrando…' : 'Entrar'}
+          </button>
         </div>
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Entrando...' : 'Entrar'}
-        </Button>
       </form>
-
-      <p className="mt-6 text-center text-sm">
-        Não tem conta?{' '}
-        <Link to="/register" search={{ redirect: redirectTo }} className="underline">
-          Cadastre-se
-        </Link>
-      </p>
-    </div>
+    </AuthShell>
   )
 }

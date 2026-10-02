@@ -19,17 +19,28 @@ const FOOTER_CATEGORIES: { category: NftCategory; label: string }[] = [
   { category: 'utility', label: 'Utilidade' },
 ]
 
-const PROFILE_SOON = ['Minha coleção', 'Atividade', 'Estúdio do criador', 'Lista de interesse']
-const HELP_SOON = ['Central de ajuda', 'Como comprar NFTs', 'Carteira e segurança', 'Política do mercado', 'Denunciar item']
+const PROFILE_LINKS = [
+  { to: '/profile', label: 'Meu perfil' },
+  { to: '/wallets', label: 'Carteiras' },
+  { to: '/activity', label: 'Atividade' },
+  { to: '/watchlist', label: 'Lista de interesse' },
+] as const
+const PROFILE_SOON = ['Minha coleção', 'Estúdio do criador']
+/** itens da central de ajuda que já têm guia na seção Aprenda */
+const HELP_ARTICLES = [
+  { slug: 'como-comprar-seu-primeiro-nft', label: 'Como comprar NFTs' },
+  { slug: 'como-proteger-sua-carteira', label: 'Carteira e segurança' },
+]
+const HELP_SOON = ['Central de ajuda', 'Política do mercado', 'Denunciar item']
 
 const linkClass =
   'rounded-sm hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card'
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   const emailId = useId()
 
   return (
-    <footer className="mx-auto mt-16 w-full max-w-7xl px-4 pb-6">
+    <footer className={cn('mx-auto mt-16 w-full max-w-7xl px-4 pb-6', className)}>
       <div className="overflow-hidden rounded-t-xl bg-card">
         {/* destaques + newsletter */}
         <div className="grid gap-8 p-6 sm:grid-cols-2 md:p-10 lg:grid-cols-4 lg:gap-0">
@@ -88,16 +99,13 @@ export function Footer() {
         {/* colunas de links */}
         <nav aria-label="Rodapé" className="grid gap-8 p-6 text-sm sm:grid-cols-2 md:p-10 lg:grid-cols-4">
           <FooterColumn title="Meu perfil">
-            <li>
-              <Link to="/profile" className={linkClass}>
-                Meu perfil
-              </Link>
-            </li>
-            <li>
-              <Link to="/wallets" className={linkClass}>
-                Carteiras
-              </Link>
-            </li>
+            {PROFILE_LINKS.map(({ to, label }) => (
+              <li key={to}>
+                <Link to={to} className={linkClass}>
+                  {label}
+                </Link>
+              </li>
+            ))}
             {PROFILE_SOON.map((label) => (
               <li key={label}>
                 <ComingSoon>{label}</ComingSoon>
@@ -106,6 +114,13 @@ export function Footer() {
           </FooterColumn>
 
           <FooterColumn title="Central de ajuda">
+            {HELP_ARTICLES.map(({ slug, label }) => (
+              <li key={slug}>
+                <Link to="/learn/$slug" params={{ slug }} className={linkClass}>
+                  {label}
+                </Link>
+              </li>
+            ))}
             {HELP_SOON.map((label) => (
               <li key={label}>
                 <ComingSoon>{label}</ComingSoon>

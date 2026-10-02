@@ -2,6 +2,7 @@ import { useId, useState, type FormEvent } from 'react'
 import { Check, SlidersHorizontal } from 'lucide-react'
 import { NFT_CATEGORIES, type NftCategory } from '@/contracts'
 import type { CatalogFilters } from '@/features/catalog/search'
+import { CATEGORY_LABELS } from '@/features/catalog/categories'
 import { toDecimal } from '@/lib/eth'
 import { cn } from '@/lib/utils'
 import { useMediaQuery } from '@/hooks/use-media-query'
@@ -12,18 +13,6 @@ import { Switch } from '@/components/ui/switch'
 import {
   Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger,
 } from '@/components/ui/sheet'
-
-const CATEGORY_LABELS: Record<NftCategory, string> = {
-  digital_art: 'Arte digital',
-  photography: 'Fotografia',
-  music: 'Música',
-  art_3d: 'Arte 3D',
-  collectibles: 'Colecionáveis',
-  generative: 'Generativa',
-  gaming: 'Jogos',
-  memberships: 'Assinaturas',
-  utility: 'Utilidade',
-}
 
 const DECIMAL = /^\d+(\.\d+)?$/
 

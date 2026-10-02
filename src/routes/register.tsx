@@ -5,10 +5,10 @@ import { z } from 'zod'
 import { registerFormSchema } from '@/contracts'
 import { sessionQueryOptions, useRegister } from '@/features/auth/queries'
 import { safeRedirect } from '@/features/auth/utils'
+import { AuthShell } from '@/features/auth/components/auth-shell'
+import { AuthInput } from '@/features/auth/components/auth-input'
+import { authLinkClass, authSubmitClass } from '@/features/auth/styles'
 import { toApiError } from '@/lib/http'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 type RegisterForm = z.infer<typeof registerFormSchema>
 
@@ -47,81 +47,76 @@ function RegisterPage() {
   })
 
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-12">
-      <h1 className="mb-6 text-2xl font-bold">Criar conta</h1>
-
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
+    <AuthShell
+      mode="register"
+      title="Criar perfil de colecionador"
+      description="Crie seu perfil de colecionador e conecte uma carteira quando quiser."
+      redirect={redirectTo}
+      switchPrompt={
+        <>
+          Já tem uma conta?{' '}
+          <Link to="/login" search={{ redirect: redirectTo }} className={authLinkClass}>
+            Entre
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={onSubmit} noValidate className="space-y-3">
         {errors.root && (
-          <p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">
+          <p role="alert" className="rounded-[3px] border border-destructive p-3 text-sm text-destructive">
             {errors.root.message}
           </p>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="name">Nome</Label>
-          <Input
-            id="name"
-            type="text"
-            autoComplete="name"
-            aria-invalid={!!errors.name}
-            aria-describedby={errors.name ? 'name-error' : undefined}
-            {...form.register('name')}
-          />
-          {errors.name && <p id="name-error" className="text-sm text-destructive">{errors.name.message}</p>}
-        </div>
+        {/* "Nome de usuário" (Figma) é o nome mostrado no perfil; o identificador (@) é gerado a partir dele */}
+        <AuthInput
+          label="Nome de usuário"
+          autoComplete="name"
+          placeholder="Nome de usuário"
+          className="[&_input]:max-lg:text-center"
+          error={errors.name?.message}
+          {...form.register('name')}
+        />
+        <AuthInput
+          label="E-mail"
+          type="email"
+          autoComplete="email"
+          placeholder="Digite seu e-mail"
+          error={errors.email?.message}
+          {...form.register('email')}
+        />
+        <AuthInput
+          label="Senha"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Senha"
+          revealable
+          error={errors.password?.message}
+          {...form.register('password')}
+        />
+        <AuthInput
+          label="Confirmar senha"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Confirmar senha"
+          revealable
+          error={errors.confirmPassword?.message}
+          {...form.register('confirmPassword')}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="email">E-mail</Label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            {...form.register('email')}
-          />
-          {errors.email && <p id="email-error" className="text-sm text-destructive">{errors.email.message}</p>}
+        <div className="pt-7 lg:pt-3">
+          <button type="submit" disabled={isSubmitting} className={authSubmitClass}>
+            {isSubmitting ? (
+              'Criando…'
+            ) : (
+              <>
+                <span className="lg:hidden">Criar perfil</span>
+                <span className="hidden lg:inline">Criar conta</span>
+              </>
+            )}
+          </button>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            aria-invalid={!!errors.password}
-            aria-describedby={errors.password ? 'password-error' : undefined}
-            {...form.register('password')}
-          />
-          {errors.password && <p id="password-error" className="text-sm text-destructive">{errors.password.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirmar senha</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            aria-invalid={!!errors.confirmPassword}
-            aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
-            {...form.register('confirmPassword')}
-          />
-          {errors.confirmPassword && (
-            <p id="confirmPassword-error" className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-          )}
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Criando conta...' : 'Criar conta'}
-        </Button>
       </form>
-
-      <p className="mt-6 text-center text-sm">
-        Já tem conta?{' '}
-        <Link to="/login" search={{ redirect: redirectTo }} className="underline">
-          Entrar
-        </Link>
-      </p>
-    </div>
+    </AuthShell>
   )
 }

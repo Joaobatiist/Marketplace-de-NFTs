@@ -4,8 +4,8 @@
 
 | Pasta | Responsabilidade |
 |---|---|
-| `src/routes/` | Rotas por arquivo (TanStack Router). Cada rota busca dados com TanStack Query e compõe componentes. `_auth.tsx` protege `/profile`, `/wallets`, `/checkout` e `/orders/$orderId` (`beforeLoad` com a sessão). |
-| `src/features/<domínio>/` | `api.ts` (chamadas Axios), `queries.ts` (query options, chaves e mutations), `components/` (apresentacionais: dados só por props). Domínios: `auth`, `catalog`, `nft`, `favorites`, `cart`, `checkout`, `wallets`, `account`, `realtime`. |
+| `src/routes/` | Rotas por arquivo (TanStack Router). Cada rota busca dados com TanStack Query e compõe componentes. `_auth.tsx` protege `/checkout`, `/orders/$orderId` e as telas da conta (`beforeLoad` com a sessão); `_auth/_account.tsx` é o layout "Meu perfil" (barra lateral) de `/profile`, `/wallets`, `/activity`, `/watchlist`, `/offers`, `/downloads` e `/support`. Seções públicas: `/market`, `/creators`, `/learn` e `/learn/$slug`. |
+| `src/features/<domínio>/` | `api.ts` (chamadas Axios), `queries.ts` (query options, chaves e mutations), `components/` (apresentacionais: dados só por props). Domínios: `auth`, `catalog`, `nft`, `favorites`, `cart`, `checkout`, `wallets`, `account`, `market` (agregações de Mercado/Criadores sobre o catálogo), `learn` (guias estáticos), `realtime`. |
 | `src/contracts/` | Tipos e schemas Zod compartilhados entre app e mock (o "contrato" da API). |
 | `src/mocks/` | Backend simulado: banco (`db.ts`), regras (`quote.ts`, `orders.ts`), handlers REST/WebSocket, tempo real (`realtime.ts`), cenários (`scenarios.ts`), reset. |
 | `src/lib/` | Infra: cliente HTTP e sessão (`http.ts`), Query Client, socket, ETH/decimal, imagem do avatar. |
@@ -38,12 +38,15 @@ Erros seguem `ApiError { code, message, fieldErrors? }`. Rotas autenticadas usam
 | POST | `/api/cart/acknowledge` | — | 200 `Cart` (aceita preços/estoque atuais) | — |
 | POST | `/api/quotes` | `{ network }` | 200 `Quote` (com `issues`) | 401 |
 | GET | `/api/wallets` | — | 200 `Wallet[]` | 401 |
-| POST | `/api/wallets` | `{ label, address, role, networks }` | 201 `Wallet` | 422, 409 `CONFLICT` (papel, endereço, limite de 2) |
+| POST | `/api/wallets` | `{ label, address, role, networks, provider, ens? }` | 201 `Wallet` | 422, 409 `CONFLICT` (papel, endereço, limite de 2) |
 | PUT | `/api/wallets/:walletId` | idem | 200 `Wallet` | 404, 422, 409 |
 | POST | `/api/wallets/:walletId/connect` | `{ network }` | 200 `WalletConnection` | 404, 422, 403 `WALLET_REJECTED` |
 | POST | `/api/orders` | `CreateOrderRequest` + header `Idempotency-Key` | 201 `Order` (`pending`); repetição da chave → o mesmo pedido | 409 `IDEMPOTENCY_CONFLICT`, 409 `QUOTE_OUTDATED`, 422 |
 | GET | `/api/orders/:orderId` | — | 200 `Order` (resolve o pagamento se o prazo passou) | 404 (também para pedido de outro usuário) |
-| GET / PATCH | `/api/profile` | `{ name?, email?, avatarUrl? }` | 200 `User` | 422, 409 (e-mail) |
+| GET | `/api/orders` | — | 200 `Order[]` só do usuário, mais recentes primeiro (Atividade, Arquivos baixados) | 401 |
+| GET | `/api/coupons` | — | 200 `CouponOffer[]` (`expired` calculado pelo servidor) | — |
+| POST | `/api/support` | `{ topic, orderId?, message }` | 201 `SupportTicket` (protocolo) | 401, 422 (inclusive pedido de outro usuário) |
+| GET / PATCH | `/api/profile` | `{ name?, email?, username?, ensName?, walletNickname?, avatarUrl? }` | 200 `User` | 422, 409 (e-mail, nome de usuário ou ENS de outro usuário) |
 | POST | `/api/profile/password` | `{ currentPassword, newPassword }` | 200 `{ ok: true }` | 422 (`currentPassword` / `newPassword`) |
 | POST | `/api/__dev/expire-sessions` | — | 204 (apoio a testes) | — |
 
@@ -119,7 +122,9 @@ ETH é sempre `string` no contrato e calculado com `decimal.js` (nunca `number`)
 - Erros de campo associados (`aria-invalid` + `aria-describedby`), alertas com `role="alert"`, regiões `aria-live` para total, status de conexão e status do pedido.
 - Estados que não dependem só de cor (ícone, texto, negrito, forma: "Esgotado", check na opção ativa, coração preenchido).
 - Radios customizados são inputs nativos transparentes cobrindo o card (teclado, foco e clique no próprio controle); Sheets/Dialogs com foco preso e devolvido; skip link para `<main>`.
-- Itens do Figma sem tela no escopo aparecem como texto "Em breve" (`aria-disabled`), nunca como link que não leva a lugar nenhum.
+- Itens do Figma ainda sem tela (no rodapé: newsletter, redes sociais, "Minha coleção", "Estúdio do criador", parte da central de ajuda) aparecem como texto "Em breve" (`aria-disabled`), nunca como link que não leva a lugar nenhum. Menu principal e barra "Meu perfil" não têm mais nenhum item "Em breve".
+- Item atual dos menus marcado com `aria-current="page"` + forma (sublinhado no header, barra lateral em "Meu perfil", barra inferior na faixa do mobile); "Aprenda" continua marcado dentro de um artigo.
+- Formulários da conta: asterisco só visual (o campo leva `aria-required`); selects nativos com placeholder; um único "Salvar" no perfil (a senha só é validada e enviada se algum campo de senha foi preenchido).
 - "Adicionar ao carrinho" em vez de "Comprar": o fluxo exigido passa pelo carrinho. Sem barra de compra fixa no mobile, para não cobrir a navegação inferior.
 
 ## 12. Desvios do Figma e assets
@@ -129,7 +134,11 @@ ETH é sempre `string` no contrato e calculado com `decimal.js` (nunca `number`)
 - **Detalhe:** sem zoom, avaliações, atributos, compartilhar; edições mostram nome + tiragem (`Standard 1/50`); favorito só ícone.
 - **Carrinho/Pagamento:** preço unitário sob o nome; "Ir para pagamento" em vez de "Conectar e finalizar"; campos do Figma sem contrato (ENS, indicação etc.) não existem; provedores (MetaMask/WalletConnect/Coinbase) substituídos por carteiras cadastradas + rede.
 - **Recibo:** coluna "Carteira" virou "Rede" (o pedido só tem `walletId`); "Ver no explorador (simulado)"; data curta pt-BR.
-- **Conta:** carteiras em lista + Dialog (o print mostra formulário inline); itens sem tela da barra lateral como "Em breve" (ocultos no mobile).
+- **Entrar / Criar conta:** fiéis aos prints. No desktop, card de 500 px com abas "Entrar | Criar conta", fechar e faixa laranja; é uma rota (`/login`, `/register`) e não um modal sobre a home, para funcionar em acesso direto, refresh e redirecionamento de rota protegida. No mobile, tela cheia com o logo, sem header nem barra inferior. Campos só com placeholder na tela (rótulo real oculto para leitor de tela). "Nome de usuário" do cadastro é o nome do perfil; o identificador `@` é gerado a partir dele. Google, Facebook e "Esqueceu a senha?" são estáticos (sem OAuth nem recuperação no escopo): `aria-disabled` e um aviso ao clicar.
+- **Perfil do colecionador:** fiel ao print (duas colunas, Nome de usuário, Nome ENS com terminação `.eth`/`.base.eth`, Apelido da carteira, Avatar com "Alterar"/"Remover", "Alterar senha" com olho e um "Salvar"). O avatar salva na hora, fora do "Salvar".
+- **Carteiras:** layout do print (Carteira principal com formulário inline, Carteira secundária com "Igual à carteira principal" + "Adicionar"), só com os campos que pertencem à carteira: apelido, rede (uma por carteira, em select), endereço, ENS opcional e tipo (MetaMask/WalletConnect/Coinbase). Nome de exibição, e-mail, Nome ENS e nome do perfil ficam no perfil (não duplicados); "Código de indicação" não existe. "Igual à carteira principal" copia apelido, rede, tipo e ENS (o endereço precisa ser outro).
+- **Barra "Meu perfil" sem print próprio:** Atividade (pedidos), Lista de interesse (favoritos), Ofertas (cupons), Arquivos baixados (obras de pedidos confirmados) e Suporte (FAQ + chamado com protocolo) seguem o mesmo layout, controles e tipografia do "Perfil do colecionador". No mobile a barra vira uma faixa com rolagem horizontal.
+- **Mercado, Criadores e Aprenda (sem print):** Mercado e Criadores agregam o catálogo (coleções, categorias, preço mínimo, estoque, obras por artista) e atualizam em tempo real; Aprenda usa os 4 cards do "Diário da Cunhagem" da home — "10 artistas digitais para acompanhar" virou "Como comprar seu primeiro NFT" (o seed tem 4 artistas fictícios).
 - **Mobile sem frame:** header mínimo (logo + menu em Sheet); barra inferior sem favoritos e sem o botão de escanear, com rótulos sob os ícones.
 - **Assets:** imagens recortadas dos prints do Figma — 4 NFTs (`public/images/nfts/1-4.webp`, resolução nativa do recorte, 238–434 px) e 4 avatares (`public/images/creators/1-4.webp`, rostos dos mesmos personagens, 160 px). Não há arte original em alta resolução.
 
@@ -138,4 +147,5 @@ ETH é sempre `string` no contrato e calculado com `decimal.js` (nunca `number`)
 - O MSW precisa iniciar o Service Worker antes da primeira renderização: no mobile o LCP fica em ~3,3 s (Performance 90–91). Com backend real, o app carregaria direto do HTML e caberiam SSR/streaming, CDN de imagens com `srcset`/AVIF e cache HTTP longo (análise completa em `lighthouse/SUMMARY.md`).
 - Regressão visual roda em Linux (baselines do container); fora do Linux use `npm run test:e2e:docker`.
 - Cada aba tem seu próprio "servidor" em memória; o tempo real não cruza abas/dispositivos.
-- Com mais tempo: páginas "Mercado", "Criadores" e "Aprenda"; lista de pedidos e favoritos; upload de avatar para storage em vez de data URL; testes de contrato entre mock e API real; internacionalização.
+- Mercado e Criadores leem o catálogo numa página de 48 itens (máximo da API; o seed tem 30). Com catálogo maior, o certo é um endpoint de agregação no servidor.
+- Com mais tempo: "Minha coleção" e "Estúdio do criador"; newsletter; histórico de chamados de suporte; upload de avatar para storage em vez de data URL; testes de contrato entre mock e API real; internacionalização.

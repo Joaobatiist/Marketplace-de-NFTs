@@ -1,108 +1,101 @@
 import { useId } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { NETWORKS, walletSchema, type ApiError, type WalletForm as WalletFormValues } from '@/contracts'
+import {
+  NETWORKS, WALLET_PROVIDERS, walletFormSchema, type ApiError, type WalletFormOutput, type WalletFormValues,
+} from '@/contracts'
+import { NETWORK_LABELS, WALLET_PROVIDER_LABELS } from '@/features/checkout/format'
 import { cn } from '@/lib/utils'
-import { Field } from '@/components/form/field'
-import { Button } from '@/components/ui/button'
-import { NETWORK_LABELS, WALLET_ROLE_LABELS } from '@/features/checkout/format'
+import { AccountField, AccountSelect, FieldError, FormAlert } from '@/features/account/components/form-controls'
+import { controlClass, submitButtonClass } from '@/features/account/form-styles'
 
 interface WalletFormProps {
   defaultValues: WalletFormValues
-  submitLabel: string
   /** envia para a API; devolve o erro (fieldErrors vão para os campos) ou null no sucesso */
-  onSubmit: (values: WalletFormValues) => Promise<ApiError | null>
-  onCancel: () => void
+  onSubmit: (values: WalletFormOutput) => Promise<ApiError | null>
 }
 
+const NETWORK_OPTIONS = NETWORKS.map((n) => ({ value: n, label: NETWORK_LABELS[n] }))
+const PROVIDER_OPTIONS = WALLET_PROVIDERS.map((p) => ({ value: p, label: WALLET_PROVIDER_LABELS[p] }))
+
+/** erros da API → campos do formulário (a API fala em `networks`; a tela tem um select de rede) */
+const FIELD_FROM_API: Record<string, keyof WalletFormValues> = { networks: 'network' }
+
 /**
- * Formulário de carteira (walletSchema): rótulo, endereço, papel (radiogroup) e redes (checkboxes).
- * Estado do formulário é local; os dados chegam e saem só por props.
+ * Formulário inline da tela Carteiras (Figma): apelido, rede, endereço, ENS opcional e tipo.
+ * Estado local; dados entram e saem só por props.
  */
-export function WalletForm({ defaultValues, submitLabel, onSubmit, onCancel }: WalletFormProps) {
-  const id = useId()
-  const form = useForm<WalletFormValues>({ resolver: zodResolver(walletSchema), defaultValues })
+export function WalletForm({ defaultValues, onSubmit }: WalletFormProps) {
+  const ensId = useId()
+  const form = useForm<WalletFormValues, unknown, WalletFormOutput>({ resolver: zodResolver(walletFormSchema), defaultValues })
   const { errors, isSubmitting } = form.formState
 
   const submit = form.handleSubmit(async (values) => {
     const apiError = await onSubmit(values)
     if (!apiError) return
-    Object.entries(apiError.fieldErrors ?? {}).forEach(([field, message]) =>
-      form.setError(field as keyof WalletFormValues, { message }),
-    )
-    if (!apiError.fieldErrors) form.setError('root', { message: apiError.message })
+    const fields = Object.entries(apiError.fieldErrors ?? {}).filter(([field]) => field !== 'role')
+    fields.forEach(([field, message]) => form.setError(FIELD_FROM_API[field] ?? (field as keyof WalletFormValues), { message }))
+    if (fields.length === 0) form.setError('root', { message: apiError.fieldErrors?.role ?? apiError.message })
   })
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-5">
+    <form onSubmit={submit} noValidate className="grid gap-x-7 gap-y-8 md:grid-cols-2">
       {errors.root && (
-        <p role="alert" className="rounded-md border border-destructive p-3 text-sm text-destructive">
-          {errors.root.message}
-        </p>
+        <div className="md:col-span-2">
+          <FormAlert>{errors.root.message}</FormAlert>
+        </div>
       )}
 
-      <Field label="Nome da carteira" autoComplete="off" error={errors.label?.message} {...form.register('label')} />
-      <Field
-        label="Endereço"
+      <AccountField label="Apelido da carteira" required autoComplete="off" error={errors.label?.message} {...form.register('label')} />
+      <AccountSelect
+        label="Rede"
+        required
+        placeholder="Selecione uma rede"
+        options={NETWORK_OPTIONS}
+        error={errors.network?.message}
+        {...form.register('network')}
+      />
+      <AccountField
+        label="Endereço da carteira"
+        required
         autoComplete="off"
         spellCheck={false}
-        placeholder="0x…"
-        hint="0x seguido de 40 caracteres hexadecimais"
-        className="[&_input]:font-mono"
+        placeholder="Endereço 0x da carteira"
         error={errors.address?.message}
         {...form.register('address')}
       />
+      {/* no Figma este campo só tem placeholder: o rótulo fica para o leitor de tela e o espaço dele é mantido */}
+      <div className="space-y-3">
+        <label htmlFor={ensId} className="sr-only">
+          ENS ou carteira secundária (opcional)
+        </label>
+        {/* mesma altura do rótulo com asterisco: o campo alinha com o "Endereço da carteira" ao lado */}
+        <div aria-hidden="true" className="hidden h-[1.125rem] md:block" />
+        <input
+          id={ensId}
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="ENS ou carteira secundária (opcional)"
+          aria-invalid={!!errors.ens}
+          aria-describedby={errors.ens ? `${ensId}-error` : undefined}
+          className={controlClass}
+          {...form.register('ens')}
+        />
+        <FieldError id={`${ensId}-error`}>{errors.ens?.message}</FieldError>
+      </div>
+      <AccountSelect
+        label="Tipo de carteira"
+        required
+        placeholder="Selecione uma carteira"
+        options={PROVIDER_OPTIONS}
+        error={errors.provider?.message}
+        {...form.register('provider')}
+      />
 
-      <fieldset aria-describedby={errors.role ? `${id}-role-error` : undefined}>
-        <legend className="mb-2 text-sm font-medium">Papel</legend>
-        <div className="flex flex-wrap gap-2">
-          {(['primary', 'secondary'] as const).map((role) => (
-            <label
-              key={role}
-              className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-input px-4 py-2 text-sm has-[:checked]:border-primary has-[:checked]:font-bold has-[:checked]:text-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
-            >
-              <input type="radio" value={role} className="accent-[var(--color-primary)]" {...form.register('role')} />
-              {WALLET_ROLE_LABELS[role]}
-            </label>
-          ))}
-        </div>
-        {errors.role && (
-          <p id={`${id}-role-error`} className="mt-2 text-sm text-destructive">
-            {errors.role.message}
-          </p>
-        )}
-      </fieldset>
-
-      <fieldset aria-describedby={errors.networks ? `${id}-networks-error` : undefined}>
-        <legend className="mb-2 text-sm font-medium">Redes</legend>
-        <div className="flex flex-wrap gap-2">
-          {NETWORKS.map((network) => (
-            <label
-              key={network}
-              className={cn(
-                'inline-flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 text-sm',
-                'has-[:checked]:border-primary has-[:checked]:text-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
-              )}
-            >
-              <input type="checkbox" value={network} className="accent-[var(--color-primary)]" {...form.register('networks')} />
-              {NETWORK_LABELS[network]}
-            </label>
-          ))}
-        </div>
-        {errors.networks && (
-          <p id={`${id}-networks-error`} className="mt-2 text-sm text-destructive">
-            {errors.networks.message}
-          </p>
-        )}
-      </fieldset>
-
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : submitLabel}
-        </Button>
+      <div className="md:col-start-1">
+        <button type="submit" disabled={isSubmitting} className={cn(submitButtonClass, 'px-2')}>
+          {isSubmitting ? 'Salvando…' : 'Salvar carteira'}
+        </button>
       </div>
     </form>
   )

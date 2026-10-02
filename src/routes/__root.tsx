@@ -1,4 +1,5 @@
-import { createRootRouteWithContext, Outlet, Link, useNavigate } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { cn } from '@/lib/utils'
 import { QueryClient } from "@tanstack/react-query";
 import { useLogout, useSession } from "@/features/auth/queries";
 import { useCartCount } from '@/features/cart/queries'
@@ -34,6 +35,8 @@ const Devtools = import.meta.env.DEV
     })
   : null
 
+const AUTH_PATHS = new Set(['/login', '/register'])
+
 interface RootRouteContext {
     queryClient: QueryClient;
 }
@@ -50,11 +53,14 @@ function RootLayout() {
   const user = session.data ? session.data.user : null
   const cartCount = useCartCount()
   const realtimeStatus = useRealtime()
+  // Entrar/Criar conta no mobile são telas cheias (Figma): sem header, rodapé e barra inferior
+  const isAuthPage = useRouterState({ select: (s) => AUTH_PATHS.has(s.location.pathname) })
 
   return (
     // pb-16: espaço para a barra inferior fixa do mobile não cobrir o rodapé
-    <div className="min-h-dvh flex flex-col pb-16 lg:pb-0">
+    <div className={cn('min-h-dvh flex flex-col lg:pb-0', !isAuthPage && 'pb-16')}>
       <Header
+        className={isAuthPage ? 'max-lg:hidden' : undefined}
         user={user}
         cartCount={cartCount}
         onSearch={(q) => navigate({ to: '/', search: { q: q || undefined, page: 1, sort: 'recent' } })}
@@ -65,8 +71,8 @@ function RootLayout() {
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
       </main>
-      <Footer />
-      <MobileBottomNav cartCount={cartCount} isAuthenticated={!!user} />
+      <Footer className={isAuthPage ? 'max-lg:hidden' : undefined} />
+      {!isAuthPage && <MobileBottomNav cartCount={cartCount} isAuthenticated={!!user} />}
       {/* depois do rodapé no DOM: o painel não entra no Tab antes do conteúdo principal */}
       {ScenarioPanel && (
         <Suspense fallback={null}>

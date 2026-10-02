@@ -1,9 +1,15 @@
-import type { Network, Wallet } from '@/contracts'
+import type { Network, Wallet, WalletProvider } from '@/contracts'
 
 export const NETWORK_LABELS: Record<Network, string> = {
   ethereum: 'Ethereum',
   polygon: 'Polygon',
   base: 'Base',
+}
+
+export const WALLET_PROVIDER_LABELS: Record<WalletProvider, string> = {
+  metamask: 'MetaMask',
+  walletconnect: 'WalletConnect',
+  coinbase: 'Coinbase Wallet',
 }
 
 export const WALLET_ROLE_LABELS: Record<Wallet['role'], string> = {

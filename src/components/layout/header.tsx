@@ -8,23 +8,34 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { ComingSoon } from './coming-soon'
 
 interface HeaderProps {
+  className?: string
   user: User | null
   cartCount: number
   onSearch: (q: string) => void
   onLogout: () => void
 }
 
-/** itens do Figma sem página ainda: aparecem como texto "Em breve" */
-const COMING_SOON_NAV = ['Mercado', 'Criadores', 'Aprenda']
+/** seções do menu principal (Figma); "Aprenda" fica ativo também dentro de um artigo (/learn/...) */
+const SECTION_NAV = [
+  { to: '/market', label: 'Mercado' },
+  { to: '/creators', label: 'Criadores' },
+  { to: '/learn', label: 'Aprenda' },
+] as const
 
 const focusRing = 'outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background'
 
-export function Header({ user, cartCount, onSearch, onLogout }: HeaderProps) {
+const navLinkClass = cn(
+  'relative flex items-center rounded-sm hover:text-primary',
+  // ativo: cor + negrito + sublinhado (não depende só da cor); o Link marca aria-current="page"
+  'data-[status=active]:font-bold data-[status=active]:text-primary data-[status=active]:after:absolute data-[status=active]:after:inset-x-0 data-[status=active]:after:-bottom-px data-[status=active]:after:h-0.5 data-[status=active]:after:bg-primary',
+  focusRing,
+)
+
+export function Header({ className, user, cartCount, onSearch, onLogout }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className={cn('sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80', className)}>
       <a
         href="#main"
         className="sr-only rounded-md bg-primary px-4 py-2 font-bold text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
@@ -38,22 +49,13 @@ export function Header({ user, cartCount, onSearch, onLogout }: HeaderProps) {
         </Link>
 
         <nav aria-label="Principal" className="hidden flex-1 justify-center gap-8 self-stretch lg:flex">
-          <Link
-            to="/"
-            activeOptions={{ exact: true, includeSearch: false }}
-            className={cn(
-              'relative flex items-center rounded-sm',
-              // ativo: cor + sublinhado (não depende só da cor)
-              'data-[status=active]:font-bold data-[status=active]:text-primary data-[status=active]:after:absolute data-[status=active]:after:inset-x-0 data-[status=active]:after:-bottom-px data-[status=active]:after:h-0.5 data-[status=active]:after:bg-primary',
-              focusRing,
-            )}
-          >
+          <Link to="/" activeOptions={{ exact: true, includeSearch: false }} className={navLinkClass}>
             Início
           </Link>
-          {COMING_SOON_NAV.map((label) => (
-            <ComingSoon key={label} className="self-center">
+          {SECTION_NAV.map(({ to, label }) => (
+            <Link key={to} to={to} activeOptions={{ includeSearch: false }} className={navLinkClass}>
               {label}
-            </ComingSoon>
+            </Link>
           ))}
         </nav>
 
@@ -274,10 +276,10 @@ function MobileMenu({ user, cartCount, onSearch, onLogout }: HeaderProps) {
               <MenuLink to="/cart">
                 Carrinho{cartCount > 0 && <span className="ml-auto text-xs text-muted-foreground">{cartCount} {cartCount === 1 ? 'item' : 'itens'}</span>}
               </MenuLink>
-              {COMING_SOON_NAV.map((label) => (
-                <li key={label} className="px-3 py-2.5 text-sm">
-                  <ComingSoon>{label}</ComingSoon>
-                </li>
+              {SECTION_NAV.map(({ to, label }) => (
+                <MenuLink key={to} to={to}>
+                  {label}
+                </MenuLink>
               ))}
             </ul>
           </nav>
@@ -341,7 +343,9 @@ function MobileMenu({ user, cartCount, onSearch, onLogout }: HeaderProps) {
   )
 }
 
-function MenuLink({ to, exact, children }: { to: '/' | '/cart' | '/profile' | '/wallets'; exact?: boolean; children: ReactNode }) {
+type MenuPath = '/' | '/cart' | '/profile' | '/wallets' | (typeof SECTION_NAV)[number]['to']
+
+function MenuLink({ to, exact, children }: { to: MenuPath; exact?: boolean; children: ReactNode }) {
   return (
     <li>
       <SheetClose asChild>

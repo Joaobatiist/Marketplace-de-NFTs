@@ -5,6 +5,12 @@ export interface User {
   name: string
   email: string
   avatarUrl: string | null
+  /** identificador público, único (Figma: "Nome de usuário") */
+  username: string
+  /** nome ENS completo, ex.: "anasouza.eth" */
+  ensName: string
+  /** como o usuário chama a própria carteira (Figma: "Apelido da carteira") */
+  walletNickname: string
 }
 
 export interface Session {
@@ -27,6 +33,9 @@ export interface UpdateProfileRequest {
   name?: string
   email?: string
   avatarUrl?: string | null
+  username?: string
+  ensName?: string
+  walletNickname?: string
 }
 
 export interface ChangePasswordRequest {

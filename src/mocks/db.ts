@@ -1,11 +1,12 @@
-import type { Nft, Order, Quote, User, Wallet } from '@/contracts/index'
+import type { Nft, Order, Quote, SupportTicket, User, Wallet } from '@/contracts/index'
 import { seedNfts } from './fixtures/nfts'
 import { seedUsers, seedWallets } from './fixtures/users'
 import { seedCoupons } from './coupons'
 import { emitNftUpdated } from './realtime'
 
-// v3: formato do carrinho mudou (priceSeen, cartCoupons); a chave nova descarta bancos antigos
-const STORAGE_KEY = 'nft-marketplace:mock-db:v3'
+// v4: perfil (username, ENS, apelido), carteira (provider, ens) e chamados de suporte;
+// a chave nova descarta bancos antigos
+const STORAGE_KEY = 'nft-marketplace:mock-db:v4'
 
 export interface StoredUser extends User {
   passwordHash: string
@@ -50,6 +51,7 @@ export interface DbState {
   wallets: Record<string, Wallet[]> // userId -> carteiras
   quotes: Record<string, StoredQuote>
   orders: Record<string, StoredOrder>
+  supportTickets: (SupportTicket & { userId: string; message: string; orderId: string | null })[]
   seq: number
 }
 
@@ -65,6 +67,7 @@ function createSeed(): DbState {
     wallets: structuredClone(seedWallets),
     quotes: {},
     orders: {},
+    supportTickets: [],
     seq: 1,
   }
 }

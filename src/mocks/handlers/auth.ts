@@ -5,6 +5,21 @@ import {
   apiError, createSession, mergeGuestCart, requireAuth, toSession, validationError,
 } from '../utils'
 
+const slug = (value: string) =>
+  value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9._]/g, '')
+
+/** identificador a partir do "Nome de usuário" do cadastro (ou do e-mail), 3–20 caracteres, sufixo se já existir */
+function uniqueUsername(name: string, email: string) {
+  const base = (slug(name) || slug(email.split('@')[0]) || 'colecionador').padEnd(3, '0').slice(0, 16)
+  let candidate = base
+  for (let n = 2; db.users.some((u) => u.username === candidate); n++) candidate = `${base}${n}`
+  return candidate
+}
+
 // o MSW deduz o tipo da resposta pelo primeiro `return`; quando o handler devolve sucesso OU erro,
 // declare os dois no 3º genérico: http.post<PathParams, DefaultBodyType, Sucesso | ApiError>
 export const authHandlers = [
@@ -18,11 +33,17 @@ export const authHandlers = [
       return apiError(409, 'CONFLICT', msg, { email: msg })
     }
 
+    const id = nextId('usr')
+    const username = uniqueUsername(name, email)
     const user: StoredUser = {
-      id: nextId('usr'),
+      id,
       name,
       email,
       avatarUrl: null,
+      // o cadastro só pede nome, e-mail e senha: o resto do perfil nasce com valores editáveis
+      username,
+      ensName: `${username.replace(/[._]/g, '-')}.eth`,
+      walletNickname: 'Minha carteira',
       passwordHash: await hashPassword(password),
     }
     db.users.push(user)
