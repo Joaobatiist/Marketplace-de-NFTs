@@ -23,3 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 .claude
+# .env.development e .env.production são versionados de propósito: só têm flags e URLs fictícias
+# (VITE_ENABLE_MOCKS, VITE_API_URL, VITE_SOCKET_URL) e o clone limpo / a Vercel precisam deles
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Lighthouse CI (temporário; os relatórios versionados ficam em lighthouse/)
+.lighthouseci/

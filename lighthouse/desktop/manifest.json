@@ -1,0 +1,74 @@
+[
+  {
+    "url": "http://localhost:4173/",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost--2026_10_02_12_43_25.report.html",
+    "jsonPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost--2026_10_02_12_43_25.report.json",
+    "summary": {
+      "performance": 1,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost--2026_10_02_12_43_38.report.html",
+    "jsonPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost--2026_10_02_12_43_38.report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/nfts/nft_001",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost-nfts_nft_001-2026_10_02_12_43_52.report.html",
+    "jsonPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost-nfts_nft_001-2026_10_02_12_43_52.report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/nfts/nft_001",
+    "isRepresentativeRun": false,
+    "htmlPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost-nfts_nft_001-2026_10_02_12_44_17.report.html",
+    "jsonPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost-nfts_nft_001-2026_10_02_12_44_17.report.json",
+    "summary": {
+      "performance": 1,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost--2026_10_02_12_43_10.report.html",
+    "jsonPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost--2026_10_02_12_43_10.report.json",
+    "summary": {
+      "performance": 1,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:4173/nfts/nft_001",
+    "isRepresentativeRun": true,
+    "htmlPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost-nfts_nft_001-2026_10_02_12_44_05.report.html",
+    "jsonPath": "C:\\Users\\joaov\\dev\\Marketplace_nfts\\lighthouse\\desktop\\localhost-nfts_nft_001-2026_10_02_12_44_05.report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1
+    }
+  }
+]
