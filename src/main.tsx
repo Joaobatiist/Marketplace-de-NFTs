@@ -9,6 +9,13 @@ async function enableMocking() {
   if (params.has('reset')) resetAll()
   const preset = params.get('scenario')
   if (preset && isPreset(preset)) scenario.applyPreset(preset)
+  // aplicados uma vez: tira da URL para um F5 (ou um ?redirect= montado a partir dela) não resetar de novo
+  if (params.has('reset') || params.has('scenario')) {
+    params.delete('reset')
+    params.delete('scenario')
+    const query = params.toString()
+    history.replaceState(history.state, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`)
+  }
   await worker.start({
     onUnhandledFrame({ frame, defaults }) {
       // frames podem ser HTTP ou WebSocket; só nos interessam requisições HTTP

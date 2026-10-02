@@ -127,7 +127,7 @@ function ChoiceCard({ name, value, checked, onChange, invalid, icon, label, desc
   return (
     <label
       className={cn(
-        'flex cursor-pointer items-center gap-3 rounded-xl border-2 bg-card p-4 text-sm transition-colors',
+        'relative flex cursor-pointer items-center gap-3 rounded-xl border-2 bg-card p-4 text-sm transition-colors',
         'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background',
         'has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50',
         checked ? 'border-primary' : invalid ? 'border-destructive/60' : 'border-transparent hover:border-primary/40',
@@ -141,7 +141,8 @@ function ChoiceCard({ name, value, checked, onChange, invalid, icon, label, desc
         onChange={onChange}
         aria-labelledby={labelId}
         aria-describedby={description ? descriptionId : undefined}
-        className="sr-only"
+        // cobre o card inteiro, transparente: o radio nativo é o alvo do clique e do teclado
+        className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
       />
       {icon}
       <span className="min-w-0 flex-1 space-y-1">

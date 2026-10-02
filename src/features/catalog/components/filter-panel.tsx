@@ -135,7 +135,7 @@ function CategoryField({ value, onChange }: { value?: NftCategory; onChange: (c:
             <label
               key={option.label}
               className={cn(
-                'flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm transition-colors',
+                'relative flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm transition-colors',
                 'hover:bg-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
                 checked ? 'font-bold text-primary' : 'text-muted-foreground',
               )}
@@ -145,7 +145,8 @@ function CategoryField({ value, onChange }: { value?: NftCategory; onChange: (c:
                 name={name}
                 checked={checked}
                 onChange={() => onChange(option.value)}
-                className="sr-only"
+                // cobre a linha, transparente: o radio nativo é o alvo do clique e do teclado
+                className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
               />
               {option.label}
               {/* marcador de selecionado: não depende só da cor */}

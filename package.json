@@ -7,7 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:report": "playwright show-report",
+    "test:e2e:docker": "node scripts/e2e-docker.mjs",
+    "test:e2e:docker:update": "node scripts/e2e-docker.mjs visual.spec.ts --update-snapshots"
   },
   "dependencies": {
     "@fontsource-variable/roboto-mono": "^5.3.0",

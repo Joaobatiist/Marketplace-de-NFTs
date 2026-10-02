@@ -93,7 +93,7 @@ function EditionPicker({ editions, value, onChange }: EditionPickerProps) {
             <label
               key={edition.id}
               className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-colors',
+                'relative inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-colors',
                 'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background',
                 soldOut
                   ? 'cursor-not-allowed border-border text-muted-foreground/60'
@@ -109,7 +109,8 @@ function EditionPicker({ editions, value, onChange }: EditionPickerProps) {
                 checked={checked}
                 disabled={soldOut}
                 onChange={() => onChange(edition.id)}
-                className="sr-only"
+                // cobre o chip, transparente: o radio nativo é o alvo do clique e do teclado
+                className="absolute inset-0 z-10 m-0 cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed"
               />
               {checked && <Check aria-hidden="true" className="size-3.5" />}
               <span className={cn(soldOut && 'line-through')}>{edition.name}</span>

@@ -28,3 +28,8 @@ dist-ssr
 
 # anotações locais (especificações dos passos)
 .notes/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/

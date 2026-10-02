@@ -32,6 +32,18 @@ export default defineConfig([
     ],
   },
   {
+    // testes E2E (Playwright): rodam no Node; o `use` das fixtures não é o hook do React,
+    // e o fixtures.ts da spec usa `Function`/`any` para acessar o window.__mock
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-refresh/only-export-components': 'off',
+      '@typescript-eslint/no-unsafe-function-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
     // arquivos de rota do TanStack Router exportam `Route` junto com o componente;
     // o plugin do router já cuida do code splitting / HMR desses arquivos
     files: ['src/routes/**/*.tsx'],
