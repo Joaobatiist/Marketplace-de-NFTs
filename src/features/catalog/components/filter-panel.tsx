@@ -62,7 +62,8 @@ export function FilterPanel(props: FilterPanelProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button className="self-start bg-primary/75 text-primary-foreground hover:bg-primary">
+        {/* primária cheia: o tom mais escuro do Figma (≈ #a36b3b) dava 4,3:1 com o texto, abaixo de 4,5:1 */}
+        <Button className="self-start">
           <SlidersHorizontal aria-hidden="true" className="size-4" />
           Filtros
           {activeCount > 0 && (

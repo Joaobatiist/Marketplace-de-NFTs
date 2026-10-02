@@ -10,6 +10,8 @@ interface NftCardProps {
   nft: Nft
   /** controle sobre a imagem (ex.: favoritar), no canto superior direito como no Figma */
   action?: ReactNode
+  /** card acima da dobra: imagem sem lazy-load (no mobile, a do 1º card é o LCP da home) */
+  priority?: boolean
 }
 
 /*
@@ -18,7 +20,7 @@ interface NftCardProps {
  * <button> sem ficar dentro do <a> (HTML inválido): ele fica num bloco posicionado com z-10,
  * acima da camada do link.
  */
-export function NftCard({ nft, action }: NftCardProps) {
+export function NftCard({ nft, action, priority = false }: NftCardProps) {
   const soldOut = isSoldOut(nft)
 
   return (
@@ -33,6 +35,7 @@ export function NftCard({ nft, action }: NftCardProps) {
           <NftImage
             src={nft.images[0]}
             alt={`Arte do NFT ${nft.name}`}
+            loading={priority ? 'eager' : 'lazy'}
             className={cn(
               'transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
               soldOut && 'opacity-50 grayscale',

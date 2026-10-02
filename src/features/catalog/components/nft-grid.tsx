@@ -19,9 +19,10 @@ interface NftGridProps {
 export function NftGrid({ nfts, renderCardAction }: NftGridProps) {
   return (
     <ul className={gridClass}>
-      {nfts.map((nft) => (
+      {nfts.map((nft, i) => (
         <li key={nft.id} className={itemClass}>
-          <NftCard nft={nft} action={renderCardAction?.(nft)} />
+          {/* 1ª linha (até 3 colunas) fica acima da dobra: imagens sem lazy-load */}
+          <NftCard nft={nft} action={renderCardAction?.(nft)} priority={i < 3} />
         </li>
       ))}
     </ul>

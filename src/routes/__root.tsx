@@ -1,6 +1,4 @@
 import { createRootRouteWithContext, Outlet, Link, useNavigate } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient } from "@tanstack/react-query";
 import { useLogout, useSession } from "@/features/auth/queries";
 import { useCartCount } from '@/features/cart/queries'
@@ -17,6 +15,24 @@ const ScenarioPanel =
   import.meta.env.VITE_ENABLE_MOCKS === 'true'
     ? lazy(() => import('@/dev/scenario-panel').then((m) => ({ default: m.ScenarioPanel })))
     : null
+
+// devtools só em desenvolvimento: o import() some do build de produção
+const Devtools = import.meta.env.DEV
+  ? lazy(async () => {
+      const [{ TanStackRouterDevtools }, { ReactQueryDevtools }] = await Promise.all([
+        import('@tanstack/react-router-devtools'),
+        import('@tanstack/react-query-devtools'),
+      ])
+      return {
+        default: () => (
+          <>
+            <TanStackRouterDevtools position="bottom-right" />
+            <ReactQueryDevtools buttonPosition="bottom-left" />
+          </>
+        ),
+      }
+    })
+  : null
 
 interface RootRouteContext {
     queryClient: QueryClient;
@@ -59,11 +75,10 @@ function RootLayout() {
       )}
       {/* fora do bloco DEV: os toasts fazem parte da interface também no build de produção */}
       <Toaster theme="dark" position="bottom-center" richColors />
-      {import.meta.env.DEV && (
-        <>
-          <TanStackRouterDevtools position="bottom-right" />
-          <ReactQueryDevtools buttonPosition="bottom-left" />
-        </>
+      {Devtools && (
+        <Suspense fallback={null}>
+          <Devtools />
+        </Suspense>
       )}
     </div>
   )

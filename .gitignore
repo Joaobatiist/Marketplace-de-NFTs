@@ -33,3 +33,6 @@ dist-ssr
 test-results/
 playwright-report/
 blob-report/
+
+# Lighthouse CI (temporário; os relatórios versionados ficam em lighthouse/)
+.lighthouseci/

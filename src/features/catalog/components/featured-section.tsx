@@ -71,8 +71,9 @@ export function FeaturedSection({ nfts, isLoading }: FeaturedSectionProps) {
             )}
           </div>
 
+          {/* altura fixa de 12 px: os botões de 24 px transbordam sem empurrar o layout */}
           {(isLoading || count > 1) && (
-            <div className="mt-4 flex h-3 items-center justify-center gap-2 md:mt-10 md:justify-end md:pr-4">
+            <div className="mt-4 flex h-3 items-center justify-center md:mt-10 md:justify-end md:pr-4">
               {nfts && count > 1
                 ? nfts.map((nft, i) => (
                     <button
@@ -81,15 +82,18 @@ export function FeaturedSection({ nfts, isLoading }: FeaturedSectionProps) {
                       onClick={() => setIndex(i)}
                       aria-label={`Mostrar destaque ${i + 1} de ${count}: ${nft.name}`}
                       aria-current={i === active ? 'true' : undefined}
-                      className={cn(
-                        // o after amplia a área de toque sem mudar o tamanho visual
-                        'relative h-2 rounded-full bg-primary/40 transition-all outline-none after:absolute after:-inset-2 after:content-[""]',
-                        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                        'motion-reduce:transition-none',
-                        // ativo = mais largo (não depende só da cor)
-                        i === active ? 'w-6 bg-primary' : 'w-2 hover:bg-primary/70',
-                      )}
-                    />
+                      // alvo de toque real de 24×24 (WCAG 2.5.8); o ponto visual de 8 px fica dentro
+                      className="group flex h-6 min-w-6 cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          'h-2 rounded-full transition-all motion-reduce:transition-none',
+                          // ativo = mais largo (não depende só da cor)
+                          i === active ? 'w-6 bg-primary' : 'w-2 bg-primary/40 group-hover:bg-primary/70',
+                        )}
+                      />
+                    </button>
                   ))
                 : isLoading && <Skeleton className="h-2 w-14 rounded-full" />}
             </div>

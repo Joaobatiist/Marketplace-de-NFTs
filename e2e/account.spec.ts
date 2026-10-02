@@ -77,7 +77,7 @@ test('carteiras: cadastrar, editar, endereço inválido e papel duplicado', asyn
 
   await dialog.getByLabel('Endereço').fill(`0x${'b'.repeat(40)}`)
   await dialog.getByRole('button', { name: 'Salvar carteira' }).click()
-  await expect(page.getByText('Carteira cadastrada')).toBeVisible()
+  await expect(page.getByText('Carteira cadastrada', { exact: true })).toBeVisible()
   await expect(page.getByRole('article', { name: 'Principal do Bruno' })).toBeVisible()
 
   // segunda principal: conflito no campo papel
@@ -95,6 +95,6 @@ test('carteiras: cadastrar, editar, endereço inválido e papel duplicado', asyn
   await edit.getByLabel('Nome da carteira').fill('Carteira Bruno')
   await edit.getByRole('checkbox', { name: 'Polygon' }).check()
   await edit.getByRole('button', { name: 'Salvar alterações' }).click()
-  await expect(page.getByText('Carteira atualizada')).toBeVisible()
+  await expect(page.getByText('Carteira atualizada', { exact: true })).toBeVisible()
   await expect(page.getByRole('article', { name: 'Carteira Bruno' })).toContainText('Polygon')
 })
