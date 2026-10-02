@@ -10,6 +10,13 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { Toaster } from 'sonner'
+import { lazy, Suspense } from 'react'
+
+// painel de cenários: só no build com mocks (demonstração), em chunk separado
+const ScenarioPanel =
+  import.meta.env.VITE_ENABLE_MOCKS === 'true'
+    ? lazy(() => import('@/dev/scenario-panel').then((m) => ({ default: m.ScenarioPanel })))
+    : null
 
 interface RootRouteContext {
     queryClient: QueryClient;
@@ -44,6 +51,12 @@ function RootLayout() {
       </main>
       <Footer />
       <MobileBottomNav cartCount={cartCount} isAuthenticated={!!user} />
+      {/* depois do rodapé no DOM: o painel não entra no Tab antes do conteúdo principal */}
+      {ScenarioPanel && (
+        <Suspense fallback={null}>
+          <ScenarioPanel />
+        </Suspense>
+      )}
       {/* fora do bloco DEV: os toasts fazem parte da interface também no build de produção */}
       <Toaster theme="dark" position="bottom-center" richColors />
       {import.meta.env.DEV && (

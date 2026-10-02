@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay, type DefaultBodyType, type PathParams } from 'msw'
+import { http, HttpResponse, type DefaultBodyType, type PathParams } from 'msw'
 import type { ApiError, FavoritesResponse } from '@/contracts'
 import { db, findNft, persist } from '../db'
 import { apiError, requireAuth } from '../utils'
@@ -7,7 +7,6 @@ import { apiError, requireAuth } from '../utils'
 // (PUT/DELETE respondem 204 sem corpo: sucesso é `null`)
 export const favoriteHandlers = [
   http.get<PathParams, DefaultBodyType, FavoritesResponse | ApiError>('/api/favorites', async ({ request }) => {
-    await delay()
     const auth = requireAuth(request)
     if ('error' in auth) return auth.error
     return HttpResponse.json<FavoritesResponse>({ nftIds: db.favorites[auth.user.id] ?? [] })
@@ -15,7 +14,6 @@ export const favoriteHandlers = [
 
   // PUT e DELETE são idempotentes: repetir não duplica nem quebra
   http.put<PathParams, DefaultBodyType, null | ApiError>('/api/favorites/:nftId', async ({ request, params }) => {
-    await delay()
     const auth = requireAuth(request)
     if ('error' in auth) return auth.error
     const nftId = String(params.nftId)
@@ -28,7 +26,6 @@ export const favoriteHandlers = [
   }),
 
   http.delete<PathParams, DefaultBodyType, null | ApiError>('/api/favorites/:nftId', async ({ request, params }) => {
-    await delay()
     const auth = requireAuth(request)
     if ('error' in auth) return auth.error
     db.favorites[auth.user.id] = (db.favorites[auth.user.id] ?? []).filter((id) => id !== params.nftId)

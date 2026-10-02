@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay, type DefaultBodyType, type PathParams } from 'msw'
+import { http, HttpResponse, type DefaultBodyType, type PathParams } from 'msw'
 import { loginSchema, registerRequestSchema, type ApiError, type AuthResponse, type Session } from '@/contracts'
 import { db, hashPassword, nextId, persist, type StoredUser } from '../db'
 import {
@@ -9,7 +9,6 @@ import {
 // declare os dois no 3º genérico: http.post<PathParams, DefaultBodyType, Sucesso | ApiError>
 export const authHandlers = [
   http.post<PathParams, DefaultBodyType, AuthResponse | ApiError>('/api/auth/register', async ({ request }) => {
-    await delay(400)
     const parsed = registerRequestSchema.safeParse(await request.json())
     if (!parsed.success) return validationError(parsed.error)
 
@@ -39,7 +38,6 @@ export const authHandlers = [
   }),
 
   http.post<PathParams, DefaultBodyType, AuthResponse | ApiError>('/api/auth/login', async ({ request }) => {
-    await delay(400)
     const parsed = loginSchema.safeParse(await request.json())
     if (!parsed.success) return validationError(parsed.error)
 

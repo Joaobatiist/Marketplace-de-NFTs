@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay, type DefaultBodyType, type PathParams } from 'msw'
+import { http, HttpResponse, type DefaultBodyType, type PathParams } from 'msw'
 import type { ApiError, Nft, NftSort, Paginated } from '@/contracts'
 import { isSoldOut, minEditionPrice, toDecimal } from '@/lib/eth'
 import { db } from '../db'
@@ -14,12 +14,10 @@ const sorters: Record<NftSort, (a: Nft, b: Nft) => number> = {
 export const nftHandlers = [
   // "featured" antes de ":id", senão o MSW trata "featured" como um id
   http.get('/api/nfts/featured', async () => {
-    await delay()
     return HttpResponse.json<Nft[]>(db.nfts.filter((n) => n.featured))
   }),
 
   http.get('/api/nfts', async ({ request }) => {
-    await delay() // latência aleatória realista; no passo 12 vira configurável
     const p = new URL(request.url).searchParams
     const q = p.get('q')?.trim().toLowerCase()
     const category = p.get('category')
@@ -51,7 +49,6 @@ export const nftHandlers = [
 
   // sucesso OU erro: declara os dois, senão o MSW fixa o tipo pelo primeiro return (ver auth.ts)
   http.get<PathParams, DefaultBodyType, Nft | ApiError>('/api/nfts/:nftId', async ({ params }) => {
-    await delay()
     const nft = db.nfts.find((n) => n.id === params.nftId)
     if (!nft) return apiError(404, 'NOT_FOUND', 'NFT não encontrado.')
     return HttpResponse.json<Nft>(nft)

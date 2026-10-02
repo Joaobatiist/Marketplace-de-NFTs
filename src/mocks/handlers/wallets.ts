@@ -6,7 +6,6 @@ import { apiError, requireAuth } from '../utils'
 
 export const walletHandlers = [
   http.get<PathParams, DefaultBodyType, Wallet[] | ApiError>('/api/wallets', async ({ request }) => {
-    await delay()
     const auth = requireAuth(request)
     if ('error' in auth) return auth.error
     return HttpResponse.json(db.wallets[auth.user.id] ?? [])
@@ -27,7 +26,7 @@ export const walletHandlers = [
         const msg = 'Esta carteira não suporta a rede selecionada.'
         return apiError(422, 'VALIDATION_ERROR', msg, { network: msg })
       }
-      if (scenario.get('wallet') === 'reject') {
+      if (scenario.get().wallet === 'reject') {
         return apiError(403, 'WALLET_REJECTED', 'A conexão foi recusada na carteira.')
       }
 

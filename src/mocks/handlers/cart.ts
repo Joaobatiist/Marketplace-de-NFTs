@@ -1,4 +1,4 @@
-import { http, HttpResponse, delay, type DefaultBodyType, type PathParams } from 'msw'
+import { http, HttpResponse, type DefaultBodyType, type PathParams } from 'msw'
 import type {
   ApiError, ApplyCouponRequest, Cart, Quote, QuoteRequest, UpsertCartItemRequest,
 } from '@/contracts'
@@ -45,7 +45,6 @@ function validateQuantity(nftId: string, editionId: string, quantity: number) {
 
 export const cartHandlers = [
   http.get<PathParams, DefaultBodyType, CartRes>('/api/cart', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     return HttpResponse.json(toCart(owner.key))
@@ -53,7 +52,6 @@ export const cartHandlers = [
 
   // adicionar a partir do detalhe: soma à quantidade existente
   http.post<PathParams, UpsertCartItemRequest, CartRes>('/api/cart/items', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     const { nftId, editionId, quantity } = await request.json()
@@ -72,7 +70,6 @@ export const cartHandlers = [
 
   // alterar no carrinho: define a quantidade exata
   http.put<PathParams, UpsertCartItemRequest, CartRes>('/api/cart/items', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     const { nftId, editionId, quantity } = await request.json()
@@ -90,7 +87,6 @@ export const cartHandlers = [
   http.delete<{ nftId: string; editionId: string }, DefaultBodyType, CartRes>(
     '/api/cart/items/:nftId/:editionId',
     async ({ request, params }) => {
-      await delay()
       const owner = resolveCartOwner(request)
       if ('error' in owner) return owner.error
       db.carts[owner.key] = (db.carts[owner.key] ?? []).filter(
@@ -102,7 +98,6 @@ export const cartHandlers = [
   ),
 
   http.post<PathParams, ApplyCouponRequest, CartRes>('/api/cart/coupon', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     const code = (await request.json()).code?.trim().toUpperCase() ?? ''
@@ -119,7 +114,6 @@ export const cartHandlers = [
   }),
 
   http.delete<PathParams, DefaultBodyType, CartRes>('/api/cart/coupon', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     delete db.cartCoupons[owner.key]
@@ -129,7 +123,6 @@ export const cartHandlers = [
 
   // usuário aceita as mudanças: atualiza preços vistos, ajusta quantidades e remove esgotados
   http.post<PathParams, DefaultBodyType, CartRes>('/api/cart/acknowledge', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     db.carts[owner.key] = (db.carts[owner.key] ?? []).flatMap((item) => {
@@ -144,7 +137,6 @@ export const cartHandlers = [
   }),
 
   http.post<PathParams, QuoteRequest, Quote | ApiError>('/api/quotes', async ({ request }) => {
-    await delay()
     const owner = resolveCartOwner(request)
     if ('error' in owner) return owner.error
     const { network } = await request.json()

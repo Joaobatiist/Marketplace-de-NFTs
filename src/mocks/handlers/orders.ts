@@ -21,7 +21,6 @@ function sameQuote(reviewed: Quote, fresh: Quote) {
 
 export const orderHandlers = [
   http.post<PathParams, CreateOrderRequest, Order | ApiError>('/api/orders', async ({ request }) => {
-    await delay()
     const auth = requireAuth(request)
     if ('error' in auth) return auth.error
 
@@ -93,17 +92,22 @@ export const orderHandlers = [
       idempotencyKey: key,
       requestFingerprint: fingerprint,
       settleAt: new Date(now + PAYMENT_DELAY_MS).toISOString(),
-      outcome: scenario.get('payment') === 'decline' ? 'declined' : 'confirmed',
+      outcome: scenario.get().payment === 'decline' ? 'declined' : 'confirmed',
     }
     db.orders[order.id] = order
     persist()
+
+    if (scenario.get().orderTimeoutOnce) {
+      scenario.set({ orderTimeoutOnce: false })
+      // o pedido FOI criado, mas a resposta só chega depois do timeout do cliente (10 s)
+      await delay(15_000)
+    }
 
     setTimeout(() => settleIfDue(db.orders[order.id]), PAYMENT_DELAY_MS + 50)
     return HttpResponse.json(toPublicOrder(order), { status: 201 })
   }),
 
   http.get<{ orderId: string }, DefaultBodyType, Order | ApiError>('/api/orders/:orderId', async ({ request, params }) => {
-    await delay()
     const auth = requireAuth(request)
     if ('error' in auth) return auth.error
 
