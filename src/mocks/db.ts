@@ -2,6 +2,7 @@ import type { Nft, Order, Quote, User, Wallet } from '@/contracts/index'
 import { seedNfts } from './fixtures/nfts'
 import { seedUsers, seedWallets } from './fixtures/users'
 import { seedCoupons } from './coupons'
+import { emitNftUpdated } from './realtime'
 
 // v3: formato do carrinho mudou (priceSeen, cartCoupons); a chave nova descarta bancos antigos
 const STORAGE_KEY = 'nft-marketplace:mock-db:v3'
@@ -129,6 +130,7 @@ export function updateEdition(
 
   Object.assign(edition, patch)
   nft.version += 1
+  emitNftUpdated(nft)
   persist()
   return nft
 }

@@ -4,6 +4,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient } from "@tanstack/react-query";
 import { useLogout, useSession } from "@/features/auth/queries";
 import { useCartCount } from '@/features/cart/queries'
+import { useRealtime } from '@/features/realtime/use-realtime'
+import { RealtimeStatusBanner } from '@/features/realtime/components/realtime-status-banner'
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
@@ -24,6 +26,7 @@ function RootLayout() {
   const navigate = useNavigate()
   const user = session.data ? session.data.user : null
   const cartCount = useCartCount()
+  const realtimeStatus = useRealtime()
 
   return (
     // pb-16: espaço para a barra inferior fixa do mobile não cobrir o rodapé
@@ -34,6 +37,7 @@ function RootLayout() {
         onSearch={(q) => navigate({ to: '/', search: { q: q || undefined, page: 1, sort: 'recent' } })}
         onLogout={() => logout.mutate()}
       />
+      <RealtimeStatusBanner status={realtimeStatus} />
       {/* tabIndex -1: o skip link "Pular para o conteúdo" consegue mover o foco para cá */}
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />

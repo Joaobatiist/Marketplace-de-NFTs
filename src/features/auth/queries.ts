@@ -59,7 +59,6 @@ export function useLogout() {
     mutationFn: () => authApi.logout().catch(() => undefined),
     onSettled: async () => {
       tokenStorage.clear()
-      // TODO passo 11: desconectar o socket aqui
       replaceSession(queryClient, null)
       await router.invalidate()
       await router.navigate({ to: '/' })

@@ -1,33 +1,4 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '@/lib/query-client'
-import { routeTree } from './routeTree.gen'
-import { setSessionExpiredHandler, tokenStorage } from '@/lib/http'
-import { replaceSession } from '@/features/auth/queries'
 import './index.css'
-
-const router = createRouter({
-  routeTree,
-  context: { queryClient },
-  defaultPreload: 'intent', // pré-carrega a rota quando o mouse passa no link
-  defaultPreloadStaleTime: 0, // deixa o cache do Query decidir, não o do Router
-  scrollRestoration: true,
-})
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
-  }
-}
-
-setSessionExpiredHandler(() => {
-  tokenStorage.clear()
-  replaceSession(queryClient, null)
-  // reexecuta o beforeLoad das rotas: se a atual for protegida, manda para o login
-  void router.invalidate()
-})
 
 async function enableMocking() {
   if (import.meta.env.VITE_ENABLE_MOCKS !== 'true') return
@@ -43,12 +14,7 @@ async function enableMocking() {
   })
 }
 
-enableMocking().then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </StrictMode>,
-  )
-})
+// o app só é importado depois do MSW: ver o comentário no topo de app.tsx
+enableMocking()
+  .then(() => import('./app'))
+  .then(({ renderApp }) => renderApp())

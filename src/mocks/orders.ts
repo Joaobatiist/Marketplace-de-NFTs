@@ -1,5 +1,6 @@
 import type { Network, Order } from '@/contracts'
 import { cartKey, db, findEdition, persist, updateEdition, type StoredOrder } from './db'
+import { emitOrderUpdated } from './realtime'
 
 export const PAYMENT_DELAY_MS = 5000
 
@@ -58,5 +59,6 @@ export function settleIfDue(order: StoredOrder | undefined) {
   }
 
   order.version += 1
+  emitOrderUpdated(order)
   persist()
 }

@@ -29,5 +29,6 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  'order.watch': (orderId: string) => void
+  /** identifica o usuário da conexão; null = visitante */
+  'session.join': (token: string | null) => void
 }
