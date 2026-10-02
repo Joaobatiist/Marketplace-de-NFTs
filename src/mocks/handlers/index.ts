@@ -1,3 +1,4 @@
+import { accountHandlers } from './account'
 import { authHandlers } from './auth'
 import { cartHandlers } from './cart'
 import { favoriteHandlers } from './favorites'
@@ -14,6 +15,7 @@ export const handlers = [
   ...nftHandlers,
   ...favoriteHandlers,
   ...cartHandlers,
+  ...accountHandlers,
   ...walletHandlers,
   ...orderHandlers,
   ...realtimeHandlers,
